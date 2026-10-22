@@ -1,11 +1,20 @@
 import Image from "next/image";
 import { SiteFooter } from "@/components/copper/site-footer";
 import { SiteHeader } from "@/components/copper/site-header";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getProducts } from "@/lib/copper/catalog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  formatMemory,
+  formatNotesHours,
+  formatUsd,
+  getPlans,
+  getProducts,
+} from "@/lib/copper/catalog";
 
 export default function Home() {
   const products = getProducts();
+  const plans = getPlans();
 
   return (
     <>
@@ -38,6 +47,107 @@ export default function Home() {
                   className="h-auto w-full"
                 />
               ))}
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="products"
+          data-testid="products"
+          className="scroll-mt-16 py-12 md:py-20"
+        >
+          <div className="mx-auto max-w-5xl px-4">
+            <h2 className="text-3xl font-bold">Meet the products</h2>
+            <div className="mt-8 grid gap-6 md:grid-cols-2">
+              {products.map((product) => (
+                <Card
+                  key={product.id}
+                  data-testid="product-card"
+                  data-product={product.id}
+                >
+                  <CardContent className="flex flex-col gap-4">
+                    <Image
+                      src={product.cutout}
+                      alt={`${product.name} ${product.type}`}
+                      width={1254}
+                      height={1254}
+                      className="mx-auto h-auto w-full max-w-xs"
+                    />
+                    <div className="flex items-baseline justify-between gap-4">
+                      <h3 className="text-2xl font-semibold">{product.name}</h3>
+                      <span className="text-xl font-bold">
+                        {formatUsd(product.priceUsd)}
+                      </span>
+                    </div>
+                    <p className="text-muted-foreground">{product.type}</p>
+                    <ul className="flex flex-col gap-2">
+                      {product.features.map((feature) => (
+                        <li key={feature.name}>
+                          <span className="font-medium">{feature.name}.</span>{" "}
+                          <span className="text-muted-foreground">
+                            {feature.description}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="text-sm">
+                      <span className="font-medium">Colors:</span>{" "}
+                      {product.colors.join(", ")}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="plus"
+          data-testid="plus-pricing"
+          className="bg-secondary text-secondary-foreground scroll-mt-16 py-12 md:py-20"
+        >
+          <div className="mx-auto max-w-5xl px-4">
+            <h2 className="text-3xl font-bold">Free or Copper Plus</h2>
+            <div className="mt-8 grid gap-6 md:grid-cols-2">
+              {plans.map((plan) => {
+                const isPlus = plan.id === "copper-plus";
+                return (
+                  <Card
+                    key={plan.id}
+                    className={isPlus ? "border-primary border-2" : undefined}
+                  >
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-3 text-2xl">
+                        {plan.name}
+                        {isPlus && <Badge>Best value</Badge>}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-col gap-4">
+                      <p className="text-3xl font-bold">
+                        {formatUsd(plan.monthlyUsd)}
+                        <span className="text-muted-foreground text-base font-normal">
+                          /month
+                        </span>
+                      </p>
+                      {isPlus && (
+                        <p className="text-muted-foreground">
+                          or {formatUsd(plan.annualUsd)}/year
+                        </p>
+                      )}
+                      <ul className="flex flex-col gap-2">
+                        <li>Memory kept: {formatMemory(plan.memoryDays)}</li>
+                        <li>
+                          Notes recording:{" "}
+                          {formatNotesHours(plan.notesHoursPerMonth)}
+                        </li>
+                        <li>
+                          Refined answers: {plan.refinedAnswers ? "Yes" : "No"}
+                        </li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </div>
         </section>
