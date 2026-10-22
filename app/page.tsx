@@ -9,12 +9,44 @@ import {
   formatNotesHours,
   formatUsd,
   getPlans,
+  getPrivacySummary,
   getProducts,
 } from "@/lib/copper/catalog";
+
+// Alt text, captions and sizes for the lifestyle photos, keyed by image path.
+// Which photos appear, and for which product, comes from the catalog.
+const LIFESTYLE: Record<
+  string,
+  { alt: string; caption: string; width: number; height: number }
+> = {
+  "/assets/lifestyle/copper-home-desert-light.png": {
+    alt: "Copper Home speaker on a stone counter beside a window with a desert sunset",
+    caption: "Copper Home keeps the house in sync, from sunrise to sunset.",
+    width: 1672,
+    height: 941,
+  },
+  "/assets/lifestyle/copper-notes-stone-desk.png": {
+    alt: "Copper Notes recorder and its charging disc on a stone desk in warm light",
+    caption: "Copper Notes sits on your desk, ready when ideas arrive.",
+    width: 1672,
+    height: 941,
+  },
+  "/assets/lifestyle/copper-notes-golden-hour.png": {
+    alt: "Person in a cream shirt writing in a notebook with Copper Notes clipped to the pocket",
+    caption: "Clip Copper Notes on and capture every idea hands-free.",
+    width: 1536,
+    height: 1024,
+  },
+};
 
 export default function Home() {
   const products = getProducts();
   const plans = getPlans();
+  const privacy = getPrivacySummary();
+  const showcasePhotos = products
+    .flatMap((product) => product.lifestyle)
+    .filter((src) => src in LIFESTYLE)
+    .map((src) => ({ src, ...LIFESTYLE[src] }));
 
   return (
     <>
@@ -102,6 +134,32 @@ export default function Home() {
         </section>
 
         <section
+          id="showcase"
+          data-testid="showcase"
+          className="scroll-mt-16 pb-12 md:pb-20"
+        >
+          <div className="mx-auto max-w-5xl px-4">
+            <h2 className="text-3xl font-bold">Made for Arizona living</h2>
+            <div className="mt-8 grid gap-8 md:grid-cols-2">
+              {showcasePhotos.map((photo) => (
+                <figure key={photo.src} className="flex flex-col gap-3">
+                  <Image
+                    src={photo.src}
+                    alt={photo.alt}
+                    width={photo.width}
+                    height={photo.height}
+                    className="h-auto w-full rounded-lg"
+                  />
+                  <figcaption className="text-muted-foreground">
+                    {photo.caption}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section
           id="plus"
           data-testid="plus-pricing"
           className="bg-secondary text-secondary-foreground scroll-mt-16 py-12 md:py-20"
@@ -149,6 +207,26 @@ export default function Home() {
                 );
               })}
             </div>
+          </div>
+        </section>
+
+        <section
+          id="privacy"
+          data-testid="privacy-summary"
+          className="scroll-mt-16 py-12 md:py-20"
+        >
+          <div className="mx-auto max-w-3xl px-4">
+            <h2 className="text-3xl font-bold">How Copper handles your data</h2>
+            <p className="text-muted-foreground mt-2">
+              Our {privacy.policy} privacy policy, in plain words.
+            </p>
+            <ul className="mt-6 flex flex-col gap-4">
+              {privacy.points.map((point) => (
+                <li key={point} className="border-l-4 pl-4">
+                  {point}
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
       </main>
